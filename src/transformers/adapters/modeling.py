@@ -337,15 +337,18 @@ class BertFusion(nn.Module):
             self.dense = nn.Linear(self.dense_size, 1)
 
         if self.config["query"]:
-            self.query = nn.Linear(self.dense_size, self.dense_size)
+            self.query = nn.ReLU(nn.Linear(self.dense_size, self.dense_size))
+            print("query!")
             self.query.apply(Adapter.init_bert_weights)
 
         if self.config["key"]:
-            self.key = nn.Linear(self.dense_size, self.dense_size)
+            self.key = nn.ReLU(nn.Linear(self.dense_size, self.dense_size))
+            print("key!")
             self.key.apply(Adapter.init_bert_weights)
 
         if self.config["value"]:
-            self.value = nn.Linear(self.dense_size, self.dense_size, bias=False)
+            self.value = nn.ReLU(nn.Linear(self.dense_size, self.dense_size, bias=False))
+            print("value!")
             self.value.apply(Adapter.init_bert_weights)
             if self.config["value_initialized"]:
                 self.value.weight.data = (torch.zeros(self.dense_size, self.dense_size) + 0.000001).fill_diagonal_(1.0)
