@@ -337,19 +337,22 @@ class BertFusion(nn.Module):
             self.dense = nn.Linear(self.dense_size, 1)
 
         if self.config["query"]:
-            self.query =  nn.functional.relu(nn.Linear(self.dense_size, self.dense_size))
+            self.query = nn.Linear(self.dense_size, self.dense_size)
+            self.queryrelu = nn.ReLU()
             print("query!")
-            self.query.apply(Adapter.init_bert_weights)
+            self.queryrelu.apply(Adapter.init_bert_weights)
 
         if self.config["key"]:
-            self.key =  nn.functional.relu(nn.Linear(self.dense_size, self.dense_size))
+            self.key =  nn.Linear(self.dense_size, self.dense_size)
+            self.keyrelu = nn.ReLU()
             print("key!")
-            self.key.apply(Adapter.init_bert_weights)
+            self.keyrelu.apply(Adapter.init_bert_weights)
 
         if self.config["value"]:
-            self.value =  nn.functional.relu(nn.Linear(self.dense_size, self.dense_size, bias=False))
+            self.value =  nn.Linear(self.dense_size, self.dense_size, bias=False)
+            self.valuerelu = nn.ReLU()
             print("value!")
-            self.value.apply(Adapter.init_bert_weights)
+            self.valuerelu.apply(Adapter.init_bert_weights)
             if self.config["value_initialized"]:
                 self.value.weight.data = (torch.zeros(self.dense_size, self.dense_size) + 0.000001).fill_diagonal_(1.0)
 
@@ -365,18 +368,18 @@ class BertFusion(nn.Module):
             value += residual[:, :, None, :].repeat(1, 1, value.size(2), 1)
 
         if self.config["query"]:
-            query_layer = self.query(query)
+            query_layer = self.queryrelu(self.query(query))
         else:
             query_layer = query
 
         if self.config["key"]:
-            key_layer = self.key(key)
+            key_layer = self.keyrelu(self.key(key))
         else:
             key_layer = key
 
         if self.config["value"] and self.config["value_before_softmax"]:
             # key/value have dims => batch, toks, number-of-adapters, feats
-            value_layer = self.value(value)
+            value_layer = self.valuerelu(self.value(value))
         else:
             value_layer = value
 
