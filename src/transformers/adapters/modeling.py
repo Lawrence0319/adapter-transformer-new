@@ -338,19 +338,19 @@ class BertFusion(nn.Module):
 
         if self.config["query"]:
             self.query = nn.Linear(self.dense_size, self.dense_size)
-            self.queryact = nn.ReLU()
+            self.queryact = nn.SiLU()
             print("query!")
             self.queryact.apply(Adapter.init_bert_weights)
 
         if self.config["key"]:
             self.key =  nn.Linear(self.dense_size, self.dense_size)
-            self.keyact = nn.ReLU()
+            self.keyact = nn.SiLU()
             print("key!")
             self.keyact.apply(Adapter.init_bert_weights)
 
         if self.config["value"]:
             self.value =  nn.Linear(self.dense_size, self.dense_size, bias=False)
-            self.valueact = nn.ReLU()
+            self.valueact = nn.SiLU()
             print("value!")
             self.valueact.apply(Adapter.init_bert_weights)
             if self.config["value_initialized"]:
